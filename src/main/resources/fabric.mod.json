@@ -1,0 +1,37 @@
+{
+	"schemaVersion": 1,
+	"id": "just-like-blasts",
+	"version": "${version}",
+	"name": "Just Like Blasts",
+	"description": "Fix the blast pattern on strong explosions",
+	"authors": [
+		"Teluri"
+	],
+	"contact": {
+	"homepage": "https://modrinth.com/mod/just-like-blasts",
+	"sources": "https://github.com/RBLG/just-like-blasts"
+	},
+	"license": " ",
+	"icon": "assets/just-like-blasts/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"teluri.mods.jlblasts.JustLikeBlasts"
+		],
+		"client": [
+			"teluri.mods.jlblasts.client.JustLikeBlastsClient"
+		]
+	},
+	"mixins": [
+		"just-like-blasts.mixins.json",
+		{
+			"config": "just-like-blasts.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.19.5",
+		"minecraft": "~26.3",
+		"java": ">=25"
+	}
+}
