@@ -3,7 +3,7 @@
 	"package": "teluri.mods.jlblasts.mixin",
 	"compatibilityLevel": "JAVA_25",
 	"mixins": [
-		"ExampleMixin"
+		"ServerExplosionMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

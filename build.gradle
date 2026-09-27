@@ -21,7 +21,7 @@ loom {
 		}
 	}
 	//TODO also add that in fabric.mod.json on uncommenting it
-	//accessWidenerPath = file("src/main/resources/yeet.accesswidener")
+	accessWidenerPath = file("src/main/resources/just-like-blasts.accesswidener")
 }
 
 dependencies {
