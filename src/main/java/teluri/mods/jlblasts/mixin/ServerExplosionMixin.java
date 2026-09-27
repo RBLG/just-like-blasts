@@ -40,11 +40,9 @@ public abstract class ServerExplosionMixin implements Explosion {
 	@Overwrite
 	public int explode() {
 		this.level().gameEvent(this.source, GameEvent.EXPLODE, this.center());
-		float maxreach = this.radius() * 1.3f / FALLOFF;
-		int reach = Mth.ceil(maxreach);
 		Vector3i source = this.center().toVector3f().get(RoundingMode.FLOOR, new Vector3i());
 
-		LongArrayList hits = propagateBlast(reach, source);
+		LongArrayList hits = propagateBlast(source);
 		this.hurtEntities();
 		if (this.interactsWithBlocks()) {
 			ProfilerFiller profiler = Profiler.get();
@@ -59,11 +57,12 @@ public abstract class ServerExplosionMixin implements Explosion {
 		return hits.size();
 	}
 
-	private LongArrayList propagateBlast(int reach, Vector3i source) {
+	private LongArrayList propagateBlast(Vector3i source) {
 		LongArrayList allhits = new LongArrayList();
 
 		// float startingPower = this.radius() * (0.7f + this.level().getRandom().nextFloat() * 0.6f);
 		float startingPower = this.radius() * 0.4f;
+		int reach = Mth.ceil(startingPower / FALLOFF);
 		SightEngine.forEachQuadrants((quadrant) -> {
 			LongArrayList hits = new LongArrayList();
 			ISightConsumer scons = (pos, value, block) -> {
@@ -125,7 +124,7 @@ public abstract class ServerExplosionMixin implements Explosion {
 
 	}
 
-	/////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////
 
 	// private static final ExplosionDamageCalculator EXPLOSION_DAMAGE_CALCULATOR = new ExplosionDamageCalculator();
 	// private static final int MAX_DROPS_PER_COMBINED_STACK = 16;
