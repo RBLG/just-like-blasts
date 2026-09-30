@@ -1,5 +1,5 @@
 
-name: modrinth_publish
+name: curseforge_publish
 
 on:
   workflow_dispatch:
