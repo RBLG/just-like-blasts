@@ -42,6 +42,7 @@ public abstract class ServerExplosionMixin implements Explosion {
 		this.level().gameEvent(this.source, GameEvent.EXPLODE, this.center());
 		Vector3i source = this.center().toVector3f().get(RoundingMode.FLOOR, new Vector3i());
 
+		JustLikeBlasts.LOGGER.info("calculating blast with a strength of " + this.radius());
 		LongArrayList hits = propagateBlast(source);
 		this.hurtEntities();
 		if (this.interactsWithBlocks()) {
@@ -53,7 +54,7 @@ public abstract class ServerExplosionMixin implements Explosion {
 		if (this.fire) {
 			betterCreateFire(hits);
 		}
-		JustLikeBlasts.LOGGER.info("blast hits size: " + hits.size());
+		JustLikeBlasts.LOGGER.info("blocks impacted by the blast " + hits.size());
 		return hits.size();
 	}
 
