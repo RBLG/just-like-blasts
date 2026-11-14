@@ -11,23 +11,16 @@
 	"homepage": "https://modrinth.com/mod/just-like-blasts",
 	"sources": "https://github.com/RBLG/just-like-blasts"
 	},
-	"license": " ",
+	"license": "GPL-3.0",
 	"icon": "assets/just-like-blasts/icon.png",
 	"environment": "*",
 	"entrypoints": {
 		"main": [
 			"teluri.mods.jlblasts.JustLikeBlasts"
-		],
-		"client": [
-			"teluri.mods.jlblasts.client.JustLikeBlastsClient"
 		]
 	},
 	"mixins": [
-		"just-like-blasts.mixins.json",
-		{
-			"config": "just-like-blasts.client.mixins.json",
-			"environment": "client"
-		}
+		"just-like-blasts.mixins.json"
 	],
 	"depends": {
 		"fabricloader": ">=${loader_version}",
