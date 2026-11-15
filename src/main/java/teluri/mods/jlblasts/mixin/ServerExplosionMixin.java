@@ -1,7 +1,5 @@
 package teluri.mods.jlblasts.mixin;
 
-import net.minecraft.world.level.ServerExplosion.StackCollector;
-import net.minecraft.world.phys.Vec3;
 import org.joml.RoundingMode;
 import org.joml.Vector3i;
 
@@ -30,6 +28,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.FluidState;
 import teluri.mods.jlblasts.JustLikeBlasts;
+import teluri.mods.jlblasts.misc.BetterStackCollector;
 import teluri.mods.jlblasts.sight.IResistanceProvider;
 import teluri.mods.jlblasts.sight.ISightConsumer;
 import teluri.mods.jlblasts.sight.SightEngine;
@@ -98,21 +97,21 @@ public abstract class ServerExplosionMixin implements Explosion {
     }
 
     private void applyBlast(LongArrayList hits) {
-        List<StackCollector> stacks = new ArrayList<>();
+        List<BetterStackCollector> stacks = new ArrayList<>();
         MutableBlockPos mpos = new MutableBlockPos();
-        Vec3 source = this.center();
+        //Vec3 source = this.center();
         //TODO deduplicate reach calculation
-        float startingPower = this.radius() * 0.4f;
-        int reach = Mth.ceil(startingPower / FALLOFF);
-        int dropLimit = reach - 16;
-        int reachSqr = dropLimit * dropLimit;
+        //float startingPower = this.radius() * 0.4f;
+        //int reach = Mth.ceil(startingPower / FALLOFF);
+        //int dropLimit = reach - 16;
+        //int reachSqr = dropLimit * dropLimit;
 
         for (long hit : hits) {
             mpos.set(hit);
-            double distSqr = mpos.distToLowCornerSqr(source.x, source.y, source.z);
+            //double distSqr = mpos.distToLowCornerSqr(source.x, source.y, source.z);
             //TODO technically obliteration should be based on remaining power but its not stored to there so cant do that for now
             //could prob be optimized to use a fast path to destroying the block if obliterated
-            boolean isObliterated = distSqr < reachSqr;
+            //boolean isObliterated = distSqr < reachSqr;
             this.level().getBlockState(mpos).onExplosionHit(this.level(), mpos, this, (stackx, position) -> {
                 //if (!isObliterated) {
                 betterAddOrAppendStack(stacks, stackx, position);
@@ -141,15 +140,20 @@ public abstract class ServerExplosionMixin implements Explosion {
     }
 
 
-    private static void betterAddOrAppendStack(final List<StackCollector> stacks, final ItemStack stack, final BlockPos pos) {
-        for (StackCollector stackCollector : stacks) {
-            stackCollector.tryMerge(stack);
+    private static void betterAddOrAppendStack(final List<BetterStackCollector> stacks, final ItemStack stack, final BlockPos pos) {
+        if (stack.isEmpty()) { //early check so unsafeTryMerge doesnt have to do empty checks
+            return;
+        }
+        for (var stackCollector : stacks) {
+            if (!stackCollector.unsafeTryMerge(stack)) {
+                continue;
+            }
             if (stack.isEmpty()) {
                 return;
             }
         }
 
-        stacks.add(new StackCollector(pos.immutable(), stack));
+        stacks.add(new BetterStackCollector(pos.immutable(), stack));
     }
 
     /// ///////////////////////////////////////////////////////////
