@@ -10,3 +10,4 @@ accessible field net/minecraft/world/level/ServerExplosion$StackCollector stack 
 accessible field net/minecraft/world/item/ItemStack count I
 accessible field net/minecraft/world/item/ItemStack components Lnet/minecraft/core/component/PatchedDataComponentMap;
 accessible method net/minecraft/world/item/ItemStack <init> (Lnet/minecraft/core/Holder;ILnet/minecraft/core/component/PatchedDataComponentMap;)V
+accessible field net/minecraft/world/item/ItemStack item Lnet/minecraft/core/Holder;
