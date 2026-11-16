@@ -42,7 +42,7 @@ public abstract class ServerExplosionMixin implements Explosion {
     private static float FALLOFF = 0.22500001f;
 
     @WrapMethod(method = "explode")
-    public int betterExplode(Operation<Integer> original) {
+    public void betterExplode(Operation<Void> original) {
         this.level().gameEvent(this.source, GameEvent.EXPLODE, this.center());
         Vector3i source = this.center().toVector3f().get(RoundingMode.FLOOR, new Vector3i());
 
@@ -59,7 +59,7 @@ public abstract class ServerExplosionMixin implements Explosion {
             betterCreateFire(hits);
         }
         JustLikeBlasts.LOGGER.info("blocks impacted by the blast " + hits.size());
-        return hits.size();
+        //return hits.size();
     }
 
     private LongArrayList propagateBlast(Vector3i source) {
