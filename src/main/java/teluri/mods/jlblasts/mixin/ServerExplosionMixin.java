@@ -1,9 +1,12 @@
 package teluri.mods.jlblasts.mixin;
 
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import org.joml.RoundingMode;
 import org.joml.Vector3i;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,17 +31,19 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.FluidState;
 import teluri.mods.jlblasts.JustLikeBlasts;
-import teluri.mods.jlblasts.misc.BetterStackCollector;
+import teluri.mods.jlblasts.misc.BetterCollector;
 import teluri.mods.jlblasts.sight.IResistanceProvider;
 import teluri.mods.jlblasts.sight.ISightConsumer;
 import teluri.mods.jlblasts.sight.SightEngine;
+
+import static teluri.mods.jlblasts.misc.BetterCollector.MAX_COLLECTED_STACK_SIZE;
 
 @Mixin(ServerExplosion.class)
 public abstract class ServerExplosionMixin implements Explosion {
     private static float FALLOFF = 0.22500001f;
 
-    @Overwrite
-    public int explode() {
+    @WrapMethod(method = "explode")
+    public int betterExplode(Operation<Integer> original) {
         this.level().gameEvent(this.source, GameEvent.EXPLODE, this.center());
         Vector3i source = this.center().toVector3f().get(RoundingMode.FLOOR, new Vector3i());
 
@@ -97,30 +102,22 @@ public abstract class ServerExplosionMixin implements Explosion {
     }
 
     private void applyBlast(LongArrayList hits) {
-        List<BetterStackCollector> stacks = new ArrayList<>();
+        List<BetterCollector> stacks = new ArrayList<>();
+        List<BetterCollector> fstacks = new ArrayList<>();
         MutableBlockPos mpos = new MutableBlockPos();
-        //Vec3 source = this.center();
-        //TODO deduplicate reach calculation
-        //float startingPower = this.radius() * 0.4f;
-        //int reach = Mth.ceil(startingPower / FALLOFF);
-        //int dropLimit = reach - 16;
-        //int reachSqr = dropLimit * dropLimit;
 
         for (long hit : hits) {
             mpos.set(hit);
-            //double distSqr = mpos.distToLowCornerSqr(source.x, source.y, source.z);
-            //TODO technically obliteration should be based on remaining power but its not stored to there so cant do that for now
-            //could prob be optimized to use a fast path to destroying the block if obliterated
-            //boolean isObliterated = distSqr < reachSqr;
             this.level().getBlockState(mpos).onExplosionHit(this.level(), mpos, this, (stackx, position) -> {
-                //if (!isObliterated) {
-                betterAddOrAppendStack(stacks, stackx, position);
-                //}
+                betterAddOrAppendStack(fstacks, stacks, stackx, position);
             });
         }
 
-        JustLikeBlasts.LOGGER.info("stacks dropped " + stacks.size());
+        JustLikeBlasts.LOGGER.info("stacks dropped: " + stacks.size() + " full: " + fstacks.size());
 
+        for (var stack : fstacks) {
+            Block.popResource(this.level(), mpos.set(stack.pos), stack.stack);
+        }
         for (var stack : stacks) {
             Block.popResource(this.level(), mpos.set(stack.pos), stack.stack);
         }
@@ -140,20 +137,22 @@ public abstract class ServerExplosionMixin implements Explosion {
     }
 
 
-    private static void betterAddOrAppendStack(final List<BetterStackCollector> stacks, final ItemStack stack, final BlockPos pos) {
-        if (stack.isEmpty()) { //early check so unsafeTryMerge doesnt have to do empty checks
-            return;
-        }
-        for (var stackCollector : stacks) {
-            if (!stackCollector.unsafeTryMerge(stack)) {
+    private static void betterAddOrAppendStack(final List<BetterCollector> fstacks, final List<BetterCollector> stacks, final ItemStack stack, final BlockPos pos) {
+        for (Iterator<BetterCollector> iterator = stacks.iterator(); iterator.hasNext(); ) {
+            var collector = iterator.next();
+            if (!collector.tryMerge(stack)) {
                 continue;
+            }
+            if (Math.min(collector.maxStackSize, MAX_COLLECTED_STACK_SIZE) <= collector.stack.getCount()) {
+                iterator.remove();
+                fstacks.add(collector);
             }
             if (stack.isEmpty()) {
                 return;
             }
         }
 
-        stacks.add(new BetterStackCollector(pos.immutable(), stack));
+        stacks.add(new BetterCollector(pos.immutable(), stack));
     }
 
     /// ///////////////////////////////////////////////////////////

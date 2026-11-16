@@ -27,5 +27,10 @@
 		"minecraft": "~${minecraft_version}",
 		"java": ">=18"
 	},
-	"accessWidener" : "just-like-blasts.accesswidener"
+	"accessWidener" : "just-like-blasts.accesswidener",
+	"custom": {
+		"lithium:options": {
+			"mixin.world.explosions.block_raycast": false
+		}
+	}
 }
